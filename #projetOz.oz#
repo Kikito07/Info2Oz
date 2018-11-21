@@ -34,11 +34,18 @@ declare
      local C in
 	C = {NewCell nil}
 	for E in Partition do
-	   if {Records.label E} == "note" then
-	      C := E|@C
-	   elseif {Record.label E} == "|" then
-	      C :=
-	      
-  
-   
-{Browse {Record.is a}}
+	   case E
+	   of Name#Octave then
+	      C := {NoteToExtended E}|@C
+	   [] Atom then
+	      C := {NoteToExtended E}|@C
+	   end	
+	end
+	C := {Reverse @C}
+	@C
+     end
+  end
+  	      
+{Browse {PartitionTimedList [a b c d e]}}
+
+
