@@ -2,7 +2,7 @@ declare
   fun {NoteToExtended Note}
       case Note
       of Name#Octave then
-         note(name:Name octave:Octave sharp:true duration:1.0 instrument:none)
+	 note(name:Name octave:Octave sharp:true duration:1.0 instrument:none)
       [] Atom then
          case {AtomToString Atom}
          of [_] then
@@ -12,17 +12,40 @@ declare
                  octave:{StringToInt [O]}
                  sharp:false
                  duration:1.0
-                 instrument: none)
+		 instrument: none)
+	 [] "silence" then note(duration : 0.0)
+	    
          end
       end
   end
 
-
-
-  local X Y in
-     X ='silence'
-     Y = {NoteToExtended X}
-     {Browse Y}
+  fun {ChordToExtended Chord}
+     local C in
+	C = {NewCell nil}
+	for E in Chord do
+	   C := {NoteToExtended E}|@C
+	end
+	C:= {Reverse @C}
+	@C
+     end
   end
   
-   
+  fun {PartitionTimedList Partition}
+     local C in
+	C = {NewCell nil}
+	for E in Partition do
+	   case E
+	   of Name#Octave then
+	      C := {NoteToExtended E}|@C
+	   [] Atom then
+	      C := {NoteToExtended E}|@C
+	   end	
+	end
+	C := {Reverse @C}
+	@C
+     end
+  end
+  	      
+{Browse {PartitionTimedList [a b c d e]}}
+
+

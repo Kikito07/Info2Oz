@@ -1,5 +1,5 @@
 declare
-fun {NoteToExtended Note}
+  fun {NoteToExtended Note}
       case Note
       of Name#Octave then
          note(name:Name octave:Octave sharp:true duration:1.0 instrument:none)
@@ -15,3 +15,14 @@ fun {NoteToExtended Note}
                  instrument: none)
          end
       end
+  end
+
+
+
+  local X Y in
+     X ='silence'
+     Y = {NoteToExtended X}
+     {Browse Y}
+  end
+  
+   
