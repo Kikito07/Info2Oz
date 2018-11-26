@@ -35,17 +35,49 @@ declare
 	C = {NewCell nil}
 	for E in Partition do
 	   case E
-	   of Name#Octave then
+	   of H|T then case H
+		       of note(name : Name octave : Octave sharp : Sharp duration:Duration instrument:Instrument) then
+			  C := E|@C
+		       [] note(duration : 0.0) then
+			  C := E|@C	  
+		       [] Name#Octave then
+			  C := {ChordToExtended E}|@C
+		       [] Atom then
+			  C := {ChordToExtended E}|@C
+		       end 
+	   [] note(name : Name octave : Octave sharp : Sharp duration:Duration instrument:Instrument) then
+	      C := E|@C
+	   [] note(duration : 0.0) then
+	      C := E|@C
+	   [] Name#Octave then
 	      C := {NoteToExtended E}|@C
 	   [] Atom then
 	      C := {NoteToExtended E}|@C
-	   end	
+	   end
 	end
 	C := {Reverse @C}
 	@C
      end
   end
-  	      
-{Browse {PartitionTimedList [a b c d e]}}
 
 
+
+     
+
+ local L in
+     L = [note(duration : 0.0)]
+     {Browse {PartitionTimedList L}}
+  end
+
+ 
+
+  {Browse {Atom.is note(name:f octave:4 sharp:true duration:1.0 instrument:none)}}
+
+ case note(note(duration : 0.0)) of  note(name : Name octave : Octave sharp : Sharp duration:Duration instrument:Instrument)
+ then {Browse 1}
+ else{Browse 0}
+ end
+
+
+
+  
