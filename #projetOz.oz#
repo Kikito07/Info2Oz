@@ -86,6 +86,31 @@ declare
      end
     end
   end
+
+  fun {Drone ChordOrNote Amount}
+     local ExtendedChordOrNote
+     C = {NewCell nil} in
+	case ChordOrNote of H|T then
+	   ExtendedChordOrNote = {ChordToExtended ChordOrNote}
+	else
+	   ExtendedChordOrNote = {NoteToExtended ChordOrNote}
+	end
+	for I in 1..Amount do
+	C := ExtendedChordOrNote|@C
+     end
+     
+	@C
+     end
+  end
+
+
+  fun{Transpose Semitones Partition}
+     local C={NewCell 0}
+	FlatPartition = {PartitonTimedList Partition}
+	Counter=1
+     in
+	for E in FlatPartition do
+	   if E == Semitones 
   
   fun {PartitionTimedList Partition}
      local C in
@@ -105,8 +130,8 @@ declare
 
 
   local L in
-     L = [a]
-     {Browse {Duration 0.0 L}}
+     L = [silence a#3 b c d e]
+     {Browse {Drone L 5}}
   end
   
   
