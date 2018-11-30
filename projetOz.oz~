@@ -56,17 +56,17 @@ declare
   
 
   fun {Stretch Factor Partition}
-
+     
     local  C = {NewCell nil} FlatPartition = {PartitionTimedList Partition} in
     
-     local fun {StretchHelper Factor ExtendedNote}
-	      local TempDict = {Record.toDictionary ExtendedNote} in
-	      {Dictionary.exchange TempDict duration ExtendedNote.duration ExtendedNote.duration*Factor}
-	      {Dictionary.toRecord note TempDict}
-	      end
-	   end
+       local fun {StretchHelper Factor ExtendedNote}
+		
+		local TempDict = {Record.toDictionary ExtendedNote} in
+		   {Dictionary.exchange TempDict duration ExtendedNote.duration ExtendedNote.duration*Factor}
+		end
+	     end
 	
-     in
+       in
 	for E in FlatPartition do
 	   case E
 	   of H|T then
@@ -86,7 +86,37 @@ declare
      end
     end
   end
+
+  fun {Drone ChordOrNote Amount}
+     local ExtendedChordOrNote
+     C = {NewCell nil} in
+	case ChordOrNote of H|T then
+	   ExtendedChordOrNote = {ChordToExtended ChordOrNote}
+	else
+	   ExtendedChordOrNote = {NoteToExtended ChordOrNote}
+	end
+	for I in 1..Amount do
+	C := ExtendedChordOrNote|@C
+     end
+     
+	@C
+     end
+  end
+
   
+  fun {Transpose Semitones Partition}
+     local
+	FlatPartition = {PartitionTimedList Partition}
+	StorageRecord = StorageRecords(c:c# c#:d d:d# d#:e e:f f:f# f#:g g:#g #g:a a:#a #a:b)
+	fun {TransposeHelper ExtendedNote}
+	   StorageRecord.(ExtendedNote.name)
+	end
+	
+	   
+	   
+	
+
+
   fun {PartitionTimedList Partition}
      local C in
 	C = {NewCell nil}
@@ -104,9 +134,12 @@ declare
   end
 
 
-  local L in
-     L = [silence]
-     {Browse {Duration 50.0 L}}
+  local Note StorageRecord in
+     
+     Note = {NoteToExtended a}
+     StorageRecord = StorageRecord(c:c# c#:d d:d# d#:e e:f f:f# f#:g g:#g #g:a a:#a #a:b)
+     {Browse StorageRecord.(Note.name)}
   end
+  
   
   
