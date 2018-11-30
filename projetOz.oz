@@ -104,22 +104,37 @@ declare
   end
 
 
- fun{Transpose Semitones Partition}
+fun{Transpose Semitones Partition}
    local
       C = {NewCell 0}
       FlatPartiton = {PartitionTimedList Partition}
-      SemitonesList = [C C# D D# E F F# G G# A A# B]
+      SemitonesList = [note(name:c octave:0 sharp:false duration:1.0 instrument:none)
+		       note(name:c octave:0 sharp:true duration:1.0 instrument:none)
+		       note(name:d octave:0 sharp:false duration:1.0 instrument:none)
+		       note(name:d octave:0 sharp:true duration:1.0 instrument:none)
+		       note(name:e octave:0 sharp:false duration:1.0 instrument:none)
+		       note(name:f octave:0 sharp:false duration:1.0 instrument:none)
+		       note(name:f octave:0 sharp:true duration:1.0 instrument:none)
+		       note(name:g octave:0 sharp:false duration:1.0 instrument:none)
+		       note(name:g octave:0 sharp:true duration:1.0 instrument:none)
+		       note(name:a octave:0 sharp:false duration:1.0 instrument:none)
+		       note(name:a octave:0 sharp:true duration:1.0 instrument:none)
+		       note(name:b octave:0 sharp:false duration:1.0 instrument:none)]
+      Index = {NewCell 0}
+
    in
       for E in FlatPartiton do
 	 for F in SemitonesList do
 	    C := @C+1
+	    Index:={List.Nth SemitonesList ((@C+Semitones) mod 12)}
 	    if E == F then
-	       {List.Nth SemitonesList ((@C+Semitones) mod 12)}
+	       note(name:Index.name octave:E.octave+1 sharp:Index.sharp duration:1.0 instrument:none)
 	    end
 	 end
       end
    end
 end
+
 	
 
 
@@ -140,13 +155,7 @@ end
   end
 
 
-  local Note StorageRecord Dict in
-     
-     Note = {NoteToExtended c#}
-     Dict = {Dictionary.new}
-     {Dictionary.put Dict "c#" '#c'}
-     {Browse {Dictionary.get Dict Note.name}}
-  end
+ 
   
   
   
