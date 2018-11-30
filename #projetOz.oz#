@@ -104,14 +104,36 @@ declare
   end
 
 
-  fun{Transpose Semitones Partition}
-     local C={NewCell 0}
-	FlatPartition = {PartitonTimedList Partition}
-	Counter=1
-     in
-	for E in FlatPartition do
-	   if E == Semitones 
-  
+ fun{Transpose Semitones Partition}
+   local
+      C = {NewCell 0}
+      FlatPartiton = {PartitionTimedList Partition}
+      SemitonesList = [note(name : c octave : Octave sharp : false duration:Duration instrument:Instrument)
+		       note(name : c octave : Octave sharp : true duration:Duration instrument:Instrument)
+		       note(name : d octave : Octave sharp : false duration:Duration instrument:Instrument)
+		       note(name : d octave : Octave sharp : true duration:Duration instrument:Instrument)
+		       note(name : e octave : Octave sharp : false duration:Duration instrument:Instrument)
+		       note(name : f octave : Octave sharp : false duration:Duration instrument:Instrument)
+		       note(name : f octave : Octave sharp : true duration:Duration instrument:Instrument)
+		       note(name : g octave : Octave sharp : true duration:Duration instrument:Instrument)
+		       note(name : g octave : Octave sharp : false duration:Duration instrument:Instrument)
+		       note(name : a octave : Octave sharp : true duration:Duration instrument:Instrument)
+		       note(name : a octave : Octave sharp : false duration:Duration instrument:Instrument)
+		       note(name : b octave : Octave sharp : false duration:Duration instrument:Instrument)]
+   in
+      for E in FlatPartiton do
+	 for F in SemitonesList do
+	    C := @C+1
+	    if E == F then
+	       {List.Nth SemitonesList ((@C+Semitones) mod 12)}
+	    end
+	 end
+      end
+   end
+end
+	
+
+
   fun {PartitionTimedList Partition}
      local C in
 	C = {NewCell nil}
@@ -128,10 +150,6 @@ declare
      end
   end
 
-
-  local L in
-     L = [silence a#3 b c d e]
-     {Browse {Drone L 5}}
-  end
+  
   
   

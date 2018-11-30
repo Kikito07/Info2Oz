@@ -103,17 +103,14 @@ declare
      end
   end
 
-  
+
   fun {Transpose Semitones Partition}
      local
-	FlatPartition = {PartitionTimedList Partition}
-	StorageRecord = StorageRecords(c:c# c#:d d:d# d#:e e:f f:f# f#:g g:#g #g:a a:#a #a:b)
-	fun {TransposeHelper ExtendedNote}
-	   StorageRecord.(ExtendedNote.name)
-	end
-	
-	   
-	   
+	Dict
+	FlatPartion = {PartitionTimedList Partition}
+     in
+	Dict = {Dictionary.new}
+	{Dictionary.put Dict c '#c'}
 	
 
 
@@ -134,11 +131,12 @@ declare
   end
 
 
-  local Note StorageRecord in
+  local Note StorageRecord Dict in
      
-     Note = {NoteToExtended a}
-     StorageRecord = StorageRecord(c:c# c#:d d:d# d#:e e:f f:f# f#:g g:#g #g:a a:#a #a:b)
-     {Browse StorageRecord.(Note.name)}
+     Note = {NoteToExtended c#}
+     Dict = {Dictionary.new}
+     {Dictionary.put Dict "c#" '#c'}
+     {Browse {Dictionary.get Dict Note.name}}
   end
   
   
