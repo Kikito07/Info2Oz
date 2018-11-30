@@ -104,13 +104,22 @@ declare
   end
 
 
-  fun {Transpose Semitones Partition}
-     local
-	Dict
-	FlatPartion = {PartitionTimedList Partition}
-     in
-	Dict = {Dictionary.new}
-	{Dictionary.put Dict c '#c'}
+ fun{Transpose Semitones Partition}
+   local
+      C = {NewCell 0}
+      FlatPartiton = {PartitionTimedList Partition}
+      SemitonesList = [C C# D D# E F F# G G# A A# B]
+   in
+      for E in FlatPartiton do
+	 for F in SemitonesList do
+	    C := @C+1
+	    if E == F then
+	       {List.Nth SemitonesList ((@C+Semitones) mod 12)}
+	    end
+	 end
+      end
+   end
+end
 	
 
 
