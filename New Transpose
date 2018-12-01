@@ -22,7 +22,7 @@ fun{Transpose Semitones Partition}
 	    C := @C+1
 	    Index:={List.Nth SemitonesList ((@C+Semitones) mod 12)}
 	    if E == F then
-	       note(name:Index.name octave:E.octave+1 sharp:Index.sharp duration:1.0 instrument:none)
+	       note(name:Index.name octave:E.octave+((@C+Semitones) / 12) sharp:Index.sharp duration:1.0 instrument:none)
 	    end
 	 end
       end
