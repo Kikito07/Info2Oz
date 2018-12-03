@@ -89,32 +89,38 @@ declare
 	  end
        end
        fun {MixHelperBis Fpartition Index LS}
-	  case Fpartition of nil then
+	  case Fpartition
+	  of nil then
 	     {List.reverse LS}
-	  else
-	     
-	     {MixHelperBis Fpartition.2 (Index + 1) {MixHelper Fpartition.1 Index}|LS}
+	  [] H|T then
+	     case H of K|L then
+		{MixHelperBis T (Index + 1.0) {FoldR {MixHelperBis H Index LS} fun {$ X Y} X + Y end 0.0}|LS}
+	     else
+		skip
+	     end
+	  else	
+	     {MixHelperBis Fpartition.2 (Index + 1.0) {MixHelper Fpartition.1 Index}|LS}
 	  end
        end
     in
-       {MixHelperBis FlatPartition 0 nil}
+       {MixHelperBis FlatPartition 0.0 nil}
     end
  end
-    
-
+ 
+ 
 
  
     
 
  local
-    L = {NoteToExtended a}
+    L = [a b c d#3 e]
  in
-    {Browse {MixHelper L 1.0}}
+    {Browse {Mix PartitionTimedList L}}
  end
 
 
  
-
+fun{wave }
 
  
  
