@@ -134,10 +134,8 @@ fun {Transpose Semitones Partition}
 		  note(name:a octave:Note.octave sharp:true  duration:Note.duration instrument:Note.instrument)
 	       elseif {And Note.name == a Note.sharp == true} then
 		  note(name:b octave:Note.octave sharp:false  duration:Note.duration instrument:Note.instrument)
-	       elseif {And Note.name == b Note.sharp == false} then
-		  note(name:c octave:Note.octave+1 sharp:false  duration:Note.duration instrument:Note.instrument)
 	       else
-		   note(duration : 0.0)
+		  note(name:c octave:Note.octave+1 sharp:false  duration:Note.duration instrument:Note.instrument)
 	       end
 	    end
 	 in
