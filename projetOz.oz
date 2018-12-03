@@ -29,6 +29,22 @@ declare
 	@C
      end
   end
+
+   fun {PartitionTimedList Partition}
+     local C in
+	C = {NewCell nil}
+	for E in Partition do
+	   case E
+	   of H|T then
+	      C := {ChordToExtended E}|@C
+	   else
+	      C := {NoteToExtended E}|@C
+	   end
+	end
+	C := {Reverse @C}
+	@C
+     end
+  end
   
 
   fun {Duration Duration Partition}
@@ -104,58 +120,65 @@ declare
   end
 
 
-fun{Transpose Semitones Partition}
-   local
-      C = {NewCell 0}
-      FlatPartiton = {PartitionTimedList Partition}
-      SemitonesList = [note(name:c octave:0 sharp:false duration:1.0 instrument:none)
-		       note(name:c octave:0 sharp:true duration:1.0 instrument:none)
-		       note(name:d octave:0 sharp:false duration:1.0 instrument:none)
-		       note(name:d octave:0 sharp:true duration:1.0 instrument:none)
-		       note(name:e octave:0 sharp:false duration:1.0 instrument:none)
-		       note(name:f octave:0 sharp:false duration:1.0 instrument:none)
-		       note(name:f octave:0 sharp:true duration:1.0 instrument:none)
-		       note(name:g octave:0 sharp:false duration:1.0 instrument:none)
-		       note(name:g octave:0 sharp:true duration:1.0 instrument:none)
-		       note(name:a octave:0 sharp:false duration:1.0 instrument:none)
-		       note(name:a octave:0 sharp:true duration:1.0 instrument:none)
-		       note(name:b octave:0 sharp:false duration:1.0 instrument:none)]
-      Index = {NewCell 0}
 
-   in
-      for E in FlatPartiton do
-	 for F in SemitonesList do
-	    C := @C+1
-	    Index:={List.Nth SemitonesList ((@C+Semitones) mod 12)}
-	    if E == F then
-	       note(name:Index.name octave:E.octave+1 sharp:Index.sharp duration:1.0 instrument:none)
+  fun {TransposeHelper Note}
+     local
+	    SemitonesList = [note(name:c octave:0 sharp:false duration:1.0 instrument:none)
+			     note(name:c octave:0 sharp:true duration:1.0 instrument:none)
+			     note(name:d octave:0 sharp:false duration:1.0 instrument:none)
+			     note(name:d octave:0 sharp:true duration:1.0 instrument:none)
+			     note(name:e octave:0 sharp:false duration:1.0 instrument:none)
+			     note(name:f octave:0 sharp:false duration:1.0 instrument:none)
+			     note(name:f octave:0 sharp:true duration:1.0 instrument:none)
+			     note(name:g octave:0 sharp:false duration:1.0 instrument:none)
+			     note(name:g octave:0 sharp:true duration:1.0 instrument:none)
+			     note(name:a octave:0 sharp:false duration:1.0 instrument:none)
+			     note(name:a octave:0 sharp:true duration:1.0 instrument:none)
+			     note(name:b octave:0 sharp:false duration:1.0 instrument:none)]
+	Index = {NewCell 0}
+	StorageRecord = {NewCell atom}
+	 in
+	    for E in SemitonesList do
+	       Index := (@Index + 1)
+	       if Note.name == E.name then
+		  if E.name == b then
+		    (note(name:c octave:Note.octave sharp true duration:Note.duration instrument:Note.instrument))
+		  else
+		     StorageRecord :=  {List.nth SemitonesList Index}
+		  end
+	       end
 	    end
+	    0
 	 end
-      end
-   end
-end
-
-	
-
-
-  fun {PartitionTimedList Partition}
-     local C in
-	C = {NewCell nil}
-	for E in Partition do
-	   case E
-	   of H|T then
-	      C := {ChordToExtended E}|@C
-	   else
-	      C := {NoteToExtended E}|@C
-	   end
-	end
-	C := {Reverse @C}
-	@C
-     end
   end
 
+  local Foo in
+     
+     fun {Foo L}
+	if L == 2 then
+	   10
+	else
+	   20
+	end
+     end
 
- 
+     {Browse {Foo 3}}
+  end
   
-  
+     
+  local SemitonesList in
+     SemitonesList = [note(name:c octave:0 sharp:false duration:1.0 instrument:none)
+			     note(name:c octave:0 sharp:true duration:1.0 instrument:none)
+			     note(name:d octave:0 sharp:false duration:1.0 instrument:none)
+			     note(name:d octave:0 sharp:true duration:1.0 instrument:none)
+			     note(name:e octave:0 sharp:false duration:1.0 instrument:none)
+			     note(name:f octave:0 sharp:false duration:1.0 instrument:none)
+			     note(name:f octave:0 sharp:true duration:1.0 instrument:none)
+			     note(name:g octave:0 sharp:false duration:1.0 instrument:none)
+			     note(name:g octave:0 sharp:true duration:1.0 instrument:none)
+			     note(name:a octave:0 sharp:false duration:1.0 instrument:none)
+			     note(name:a octave:0 sharp:true duration:1.0 instrument:none)
+			   note(name:b octave:0 sharp:false duration:1.0 instrument:none)]
+     {Browse SemitonesList}
+  end
   
