@@ -1,0 +1,15 @@
+local
+   [Project] = {Link ['D:/unif/2018-2019/info2/ProjetOz/Info2Oz/Project2018.ozf']}
+   Music
+in
+   Music = {Project.load 'joy.dj.oz'}
+
+   {Browse {Project.readFile 'wave/animals/cow.wav'}}
+end
+
+
+
+
+
+
+   
