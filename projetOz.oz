@@ -32,21 +32,25 @@ end
 
 fun {PartitionTimedList Partition}
    local
-      fun {PartitionTimedListHelper Partition L}
-	 case Partition of nil then {List.reverse L}
+      fun {PartitionTimedListHelper Part L}
+	 case Part
+	 of nil then {List.reverse L}
 	 [] H|T then case H
-		     of duration(seconds:duration partition) then {PartitionTimedListHelper Partition.2 {Duration duration.seconds duration.1}|L}
-		     [] stretch(factor:factor partition) then {PartitionTimedListHelper Partition.2 {Stretch stretch.factor stretch.1}|L}
-		     [] drone(note:noteOrchord amount: natural) then {PartitionTimedListHelper Partition.2 {Drone drone.note drone.amount}|L}
-		     []	transpose(semitones:integer partition) then {PartitionTimedListHelper Partition.2 {Transpose transpose.semitones transpose.1}|L}
-		     else  {PartitionTimedListHelper Partition.2 {ChordOrNoteToExtended Partition.1}|L}
+		     of duration(seconds:Dur P) then {PartitionTimedListHelper Part.2 {Duration H.seconds H.1}|L}
+		     [] stretch(factor:Factor P) then {PartitionTimedListHelper Part.2 {Stretch H.factor H.1}|L}
+		     [] drone(note:NoteOrchord amount:Natural) then {PartitionTimedListHelper Part.2 {Drone H.note H.amount}|L}
+		     []	transpose(semitones:Integer P) then {PartitionTimedListHelper Part.2 {Transpose H.semitones H.1}|L}
+		     else {PartitionTimedListHelper Part.2 {ChordOrNoteToExtended Part.1}|L}
 		     end
+	 else 'You re not supposed to be here'
+	 
 	 end
       end
    in
       {PartitionTimedListHelper Partition nil}
    end
 end
+
 
 fun {Duration Duration Partition}
    local FlatPartition = {PartitionTimedList Partition}
@@ -88,7 +92,7 @@ fun {Stretch Factor Partition}
 	       {StretchHelper T {F H}|L}
 	    end
 	 end
-      end
+      end   
    in
       {StretchHelper FlatPartition nil}
    end
@@ -119,7 +123,7 @@ fun {Transpose Semitones Partition}
 	 of nil then {Reverse L}
 	 [] H|T then
 	    case H of K|M then
-	       {TransposeBis Semitones T {TransposeBis Semitones M {TransposeHelper Semitones K}|L}}
+	       {TransposeBis Semitones T {TransposeBis Semitones M {TransposeHelper Semitones K}|nil}|L}
 	    else
 	       {TransposeBis Semitones T {TransposeHelper Semitones H}|L}
 	    end
@@ -167,31 +171,14 @@ fun {Transpose Semitones Partition}
    end
 end
 
-
-
 local
-   
+   Partition = [a a b g a stretch(factor:0.5 [b c5]) b g a drone(note:a amount:5) b a g a L duration(seconds:2.0 [a b c d])]
+   L = transpose(semitones:3 [d])
+   M = [[a b c] d e f]
 in
-   {Browse {Transpose 5 L}}
+   {Browse {PartitionTimedList Partition}}
 end
 
-
-{Browse {PartitionTimedList [[k l m n] g [a b c d]]}}
-local
-   Factor = 5.0
-   L = {PartitionTimedList [a b c d e]}
-   F = fun {$ Note}
-	  note(name:Note.name octave:Note.octave sharp:Note.sharp duration:Note.duration*Factor instrument:Note.instrument)
-       end
-in
-   {Browse ({List.map L F})}
-end
-
-
-   {Browse [a b c]|[g e f]|a|[i k j]|nil}
-
-{Browse {List.is [a b].2}}    
-	
 	   
 	   
 	
