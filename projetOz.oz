@@ -33,7 +33,7 @@ end
 fun {PartitionTimedList Partition}
    local
       fun {PartitionTimedListHelper Partition L}
-	 if Partition == nil then {List.reverse L}
+	 case Partition of nil then {List.reverse L}
 	 else
 	    {PartitionTimedListHelper Partition.2 {ChordOrNoteToExtended Partition.1}|L}
 	 end
@@ -71,47 +71,57 @@ fun {Stretch Factor Partition}
       F = fun {$ Note}
 	     note(name:Note.name octave:Note.octave sharp:Note.sharp duration:Note.duration*Factor instrument:Note.instrument)
 	  end	  
-      fun {StretchHelper Funct NoteL L}
+      fun {StretchHelper NoteL L}
 	 case NoteL
 	 of nil then {List.reverse L}
 	 [] H|T then
-	    case H of K|L then
-	       {StretchHelper Factor NoteL.2 {List.map H Funct}|L}
+	    case H of K|M then {StretchHelper T {StretchHelper M {F K}|nil}|L}
 	    else
-	       {StretchHelper Factor NoteL.2 {Funct H}|L}
+	       {StretchHelper T {F H}|L}
 	    end
 	 end
       end
    in
-      {StretchHelper F FlatPartition nil}
+      {StretchHelper FlatPartition nil}
    end
 end
 
-   
+
 fun {Drone ChordOrNote Amount}
-     local ExtendedChordOrNote
-	C = {NewCell nil} in
-	case ChordOrNote of H|T then
-	   ExtendedChordOrNote = {ChordToExtended ChordOrNote}
-	else
-	   ExtendedChordOrNote = {NoteToExtended ChordOrNote}
-	end
-	for I in 1..Amount do
-	   C := ExtendedChordOrNote|@C
-     end
-	@C
-     end
+   local
+      CNExtended = {ChordOrNoteToExtended ChordOrNote}
+      fun {DroneBis X N L}
+	 case N
+	 of 0 then L
+	 else
+	    {DroneBis X N - 1 (X|L)}
+	 end
+      end
+   in
+      {DroneBis CNExtended Amount nil}
+   end   
 end
 
 
 fun {Transpose Semitones Partition}
    local
       FlatPartition = {PartitionTimedList Partition}
-      L = {NewCell nil}
-      F = fun {$ Note} {TransposeHelper Note Semitones} end	
-      fun {TransposeHelper Note N}
+      fun {TransposeBis Semitones FlatP L}
+	 case FlatP
+	 of nil then {List.reverse L}
+	 [] H|T then
+	    case H of K|L then
+	       {TransposeBis Semitones T {List.map H fun {$ X} {TransposeHelper Semitones X} end}|List}
+	    else
+	       {TransposeBis Semitones T {TransposeHelper Semitones H}|List}
+	    end
+	 else
+	    1
+	 end
+      end
+      fun {TransposeHelper N Note}
 	 local
-	    fun{TransposeHelperHelper Note}
+	    fun{TransposeHelperBis Note}
 	       if {And Note.name == c Note.sharp == false} then
 		  note(name:c octave:Note.octave sharp:true  duration:Note.duration instrument:Note.instrument)
 	       elseif {And Note.name == c Note.sharp == true} then
@@ -123,7 +133,7 @@ fun {Transpose Semitones Partition}
 	       elseif {And Note.name == e Note.sharp == false} then
 		  note(name:f octave:Note.octave sharp:false  duration:Note.duration instrument:Note.instrument)	      
 	       elseif {And Note.name == f Note.sharp == false} then
-		    note(name:f octave:Note.octave sharp:true  duration:Note.duration instrument:Note.instrument)
+		  note(name:f octave:Note.octave sharp:true  duration:Note.duration instrument:Note.instrument)
 	       elseif {And Note.name == f Note.sharp == true} then
 		  note(name:g octave:Note.octave sharp:false  duration:Note.duration instrument:Note.instrument)
 	       elseif {And Note.name == g Note.sharp == false} then
@@ -136,42 +146,44 @@ fun {Transpose Semitones Partition}
 		  note(name:b octave:Note.octave sharp:false  duration:Note.duration instrument:Note.instrument)
 	       else
 		  note(name:c octave:Note.octave+1 sharp:false  duration:Note.duration instrument:Note.instrument)
-	     
 	       end
 	    end
 	 in
 	    if N==0 then Note
 	    else
-	       {TransposeHelper {TransposeHelperHelper Note} N-1}
+	       {TransposeHelper N-1 {TransposeHelperBis Note}}
 	    end
 	 end
       end
-      
    in
-      for E in FlatPartition do
-	 case E
-	 of H|T then
-	    L := {List.map E  F}|@L
-	 else
-	    L := {F E}|@L
-	 end
-      end
-      {List.reverse @L}
+      {TransposeBis Semitones FlatPartition nil}
    end
 end
 
-
+      
 
 local
-   L = [[a b c d e] e#2]
+   L =[[g b c d] a [e f g]]
 in
-   {Browse {Transpose 3 {PartitionTimedList L}}}
+   {Browse {Stretch 2.0 L}}
 end
 
 
-  
-	      
-	      
+{Browse {PartitionTimedList [[k l m n] g [a b c d]]}}
+local
+   Factor = 5.0
+   L = {PartitionTimedList [a b c d e]}
+   F = fun {$ Note}
+	  note(name:Note.name octave:Note.octave sharp:Note.sharp duration:Note.duration*Factor instrument:Note.instrument)
+       end
+in
+   {Browse ({List.map L F})}
+end
+
+
+   {Browse [a b c]|[g e f]|a|[i k j]|nil}
+
+{Browse {List.is [a b].2}}    
 	
 	   
 	   
