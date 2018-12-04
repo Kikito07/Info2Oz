@@ -45,16 +45,20 @@ end
 
 fun {Duration Duration Partition}
    local FlatPartition = {PartitionTimedList Partition}
-      LF = {List.flatten FlatPartition}
       Total
       fun {TotalDuration L Sum}
 	 case L
 	 of nil then Sum
-	 else {TotalDuration L.2 (Sum + L.1.duration)}
+	 [] H|T then
+	    case H
+	    of K|L then {TotalDuration L.2 (Sum + K.duration)}
+	    else
+	       {TotalDuration L.2 (Sum + L.1.duration)}
+	    end
 	 end
       end	 
    in
-      Total = {TotalDuration LF 0.0}
+      Total = {TotalDuration FlatPartition 0.0}
       if Total == 0.0 then
 	 {Stretch 0.0 FlatPartition}
       else
@@ -63,7 +67,6 @@ fun {Duration Duration Partition}
       
    end
 end
-
 
 fun {Stretch Factor Partition}
    local
@@ -108,15 +111,15 @@ fun {Transpose Semitones Partition}
       FlatPartition = {PartitionTimedList Partition}
       fun {TransposeBis Semitones FlatP L}
 	 case FlatP
-	 of nil then {List.reverse L}
+	 of nil then {Reverse L}
 	 [] H|T then
-	    case H of K|L then
-	       {TransposeBis Semitones T {List.map H fun {$ X} {TransposeHelper Semitones X} end}|List}
-	    else
-	       {TransposeBis Semitones T {TransposeHelper Semitones H}|List}
+	    local A = H B = T in
+	       case H of K|L then
+		  {TransposeBis Semitones A {List.map A fun {$ X} {TransposeHelper Semitones X} end}|L}
+	       else
+		  {TransposeBis Semitones B {TransposeHelper Semitones A}|L}
+	       end
 	    end
-	 else
-	    1
 	 end
       end
       fun {TransposeHelper N Note}
@@ -160,12 +163,12 @@ fun {Transpose Semitones Partition}
    end
 end
 
-      
+
 
 local
    L =[[g b c d] a [e f g]]
 in
-   {Browse {Stretch 2.0 L}}
+   {Browse {Transpose 5 L}}
 end
 
 
