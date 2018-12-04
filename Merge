@@ -1,0 +1,32 @@
+declare
+fun{Sum L M Ans}
+   case L of H|T then
+      case M of I|J then
+	 {Sum T J {Append Ans H+I}}
+      else
+	 {Sum T nil {Append Ans H}}
+      end
+   else
+      case M of I|J then
+	 {Sum nil J {Append Ans I}}
+      else
+	 Ans
+      end
+   end
+end
+fun{Merge L}
+   local
+      Answer
+      fun{MergeHelper L Ans}
+	 case L of nil then Ans
+	 [] H|T then
+	    case H of Intensitie#Music then
+	       Answer = {Map {Mix P2T Music} fun{$ X} Intensitie*X end}
+	       {MergeHelper T {Sum Ans Answer nil}}
+	    end
+	 end
+      end
+   in
+      {MergeHelper L nil}
+   end
+end
