@@ -1,0 +1,43 @@
+declare
+fun {Sum L M Ans}
+   case L of nil then Ans
+   [] H|T then
+      case M of I|J then
+	 {Sum T J {Append Ans H+I}}
+      else
+	 {Sum T nil {Append Ans H}}
+      end
+   else
+      case M of I|J then
+	 {Sum nil J {Append Ans I}}
+      else
+	 Ans
+      end
+   end
+end
+fun {Merge L}
+   local
+      fun {MergeHelper L Ans}
+	 case L of nil then Ans
+	 [] H|T then
+	    case H of Intensitie#Music then
+	       {MergeHelper T {Sum {Map Music fun{$ X} Intensitie*X end}|Ans nil}}
+	    end
+	 end
+      end
+   in
+      {MergeHelper L nil}
+   end
+end
+
+local
+   A=3#[5 4 8 6]
+   L=[2#[5 10 6 8] 3#[5 4 8 6]]
+in
+   {Browse {Merge L}}
+end
+
+   
+
+
+A={Mix P2T Music}
