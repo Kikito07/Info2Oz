@@ -31,15 +31,6 @@ fun{Merge L A}
       {MergeHelper L nil}
    end
 end
-
-local
-   A=[a b c d]
-   L=[[f g] [a d e]]
-in
-   {Merge L A}
-end
-
    
 
-
-A={Mix P2T Music}
+[Project] = {Link ['Project2018.ozf']}

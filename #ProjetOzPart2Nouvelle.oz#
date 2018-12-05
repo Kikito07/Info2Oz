@@ -176,8 +176,9 @@ end
 fun {Mix P2T Music}
    local
       FlatPartition = {P2T Music}
-      fun {MixHelper Note Index}
+      fun {MixHelper Note Index L}
 	 local
+	    Length = Note.duration*44100.0
 	    Numvalue
 	    Height
 	    F
@@ -209,19 +210,30 @@ fun {Mix P2T Music}
 	    else
 	       skip
 	    end
+<<<<<<< Updated upstream:ProjetOzPart2Nouvelle
 	    Height = {Int.toFloat (Numvalue - 10) + (( Note.octave - 4)*12)}
 	    F = {Number.pow 2.0 Height/12.0}*440.0
 	    (1.0/2.0)*{Float.sin (2.0*3.14159265359*F*Index/44100.0)}
+<<<<<<< Updated upstream:ProjetOzPart2Nouvelle
+=======
+	    (1.0/2.0)*{Float.sin (2.0*3.14159265359*{Number.pow 2.0 {Int.toFloat (Numvalue - 10) + (( Note.octave - 4)*12)}/12.0}*440.0*Index/44100.0)}
+
+=======
+	    if Index > Length then L
+	    else
+	       {MixHelper Note Index+1 (1.0/2.0)*{Float.sin (2.0*3.14159265359*{Number.pow 2.0 {Int.toFloat (Numvalue - 10) + (( Note.octave - 4)*12)}/12.0}*440.0*Index/44100.0)}|L}
+	    end
+>>>>>>> Stashed changes:ProjetOzPart2Nouvelle.oz
+>>>>>>> Stashed changes:ProjetOzPart2Nouvelle.oz
 	 end
       end
+      
       fun {MixHelperBis Fpartition Index LS}
 	 case Fpartition of nil then
 	    {List.reverse LS}
 	 [] H|T then
 	    case H of K|L then
-	       {MixHelperBis T (Index + 1.0) {FoldR {MixHelperBis H Index LS} fun {$ X Y} X + Y end 0.0}|LS}
-	    else
-	       skip
+	       {MixHelperBis T (Index + 1.0) {FoldR {MixHelperBis L Index {MisHelper K}|nil} fun {$ X Y} X + Y end 0.0}|LS}
 	    end
 	 else	
 	    {MixHelperBis Fpartition.2 (Index + 1.0) {MixHelper Fpartition.1 Index}|LS}
@@ -231,6 +243,11 @@ fun {Mix P2T Music}
       {MixHelperBis FlatPartition 0.0 nil}
    end
 end
+
+
+
+
+
 
 declare
 fun{Reverse Music}
@@ -251,6 +268,107 @@ fun{Repeat Amount Music}
    end
 end
 
-fun{Loop Duration Music}
+declare
+fun {Merge L}
+   local
+      fun {Sum L1 L2 Ans}
+	 if {And L1 == nil L2 == nil} then {Reverse Ans}
+	 elseif {And L1 \= nil L2 == nil} then {Sum L1.2 nil (L1.1|Ans)}
+	 elseif {And L1 == nil L2 \= nil} then {Sum nil L2.2 (L2.1|Ans)}	   
+	 else
+	    {Sum L1.2 L2.2 (L1.1 + L2.1)|Ans}
+	 end
+      end
+      
+      fun {MergeHelper L Acc}
+	 if L == nil then Acc
+	 else
+	    {MergeHelper L.2 {Sum Acc {Map L.1.2 fun {$ X} X*L.1.1 end} nil}}
+	 end
+      end
+   in
+      {MergeHelper L nil}
+   end
+end
 
+declare
+fun{Loop Duration Music}
+   local
+      fun {LoopHelper Duration Music Acc}
+	 local
+	    Samples = Music
+	 in 
+	    if {And Music == nil Duration < 0.0} then {Reverse Acc.2}
+	    elseif {And Music == nil Duration \= 0.0} then {LoopHelper Duration-{Int.toFloat {Length Samples.1}}/44100.0 Samples.2 Samples.1|Acc}
+	    else {LoopHelper Duration-{Int.toFloat {Length Music.1}}/44100.0 Music.2 Music.1|Acc}
+	    end
+	 end
+      end
+   in
+      {LoopHelper Duration Music nil}
+   end
+end
+
+
+
+
+
+<<<<<<< Updated upstream:ProjetOzPart2Nouvelle
 end 
+=======
+<<<<<<< Updated upstream:ProjetOzPart2Nouvelle
+end 
+=======
+local
+   Music
+   [Project] = {Link ['D:/unif/2018-2019/info2/ProjetOz/Info2Oz/Project2018.ozf']}
+   fun{PartitionToTimedList}
+   0
+   end
+   fun {NoteToExtended Note}
+      case Note
+      of Name#Octave then
+	 note(name:Name octave:Octave sharp:true duration:1.0 instrument:none)
+      [] Atom then
+	 case {AtomToString Atom}
+	 of [_] then
+	    note(name:Atom octave:4 sharp:false duration:1.0 instrument:none)
+	 [] [N O] then
+	    note(name:{StringToAtom [N]}
+		 octave:{StringToInt [O]}
+		 sharp:false
+		 duration:1.0
+		 instrument: none)
+	    
+	 end
+      end
+   end
+   
+   fun {Loop Duration Music}
+      local
+	 fun {LoopHelper Duration Music Acc}
+	    local
+	       Samples = Music
+	    in 
+	       if Duration < 0.0 then {Reverse Acc.2}
+	       elseif Music == nil then {LoopHelper Duration-{Int.toFloat {Length Samples.1}} Samples.2 Samples.1|Acc}
+	       else {LoopHelper Duration-{Int.toFloat {Length Music.1}} Music.2 Music.1|Acc}
+	       end
+	    end
+	 end
+      in
+	 {LoopHelper Duration Music nil}
+      end
+   end
+   
+   fun {Mix P2T Music}
+      {Repeat 10 {Project.readFile 'D:/unif/2018-2019/info2/ProjetOz/Info2Oz/wave/animals/owl.wav'}}
+   end
+   
+in
+   Music = {Project.load 'D:/unif/2018-2019/info2/ProjetOz/Info2Oz/joy.dj.oz'}
+   {ForAll [NoteToExtended Music] Wait}
+   {Browse {Project.run Mix PartitionToTimedList Music 'D:/unif/2018-2019/info2/ProjetOz/Info2Oz/test/out.wav'}}	 
+end
+>>>>>>> Stashed changes:ProjetOzPart2Nouvelle.oz
+>>>>>>> Stashed changes:ProjetOzPart2Nouvelle.oz
