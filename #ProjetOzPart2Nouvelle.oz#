@@ -308,17 +308,6 @@ fun{Loop Duration Music}
       {LoopHelper Duration Music nil}
    end
 end
-
-
-
-
-
-<<<<<<< Updated upstream:ProjetOzPart2Nouvelle
-end 
-=======
-<<<<<<< Updated upstream:ProjetOzPart2Nouvelle
-end 
-=======
 local
    Music
    [Project] = {Link ['D:/unif/2018-2019/info2/ProjetOz/Info2Oz/Project2018.ozf']}
@@ -370,5 +359,3 @@ in
    {ForAll [NoteToExtended Music] Wait}
    {Browse {Project.run Mix PartitionToTimedList Music 'D:/unif/2018-2019/info2/ProjetOz/Info2Oz/test/out.wav'}}	 
 end
->>>>>>> Stashed changes:ProjetOzPart2Nouvelle.oz
->>>>>>> Stashed changes:ProjetOzPart2Nouvelle.oz
