@@ -10,7 +10,7 @@ fun {NoteToExtended Note}
    [] Atom then
       case {AtomToString Atom}
       of [_] then
-	   note(name:Atom octave:4 sharp:false duration:1.0 instrument:none)
+	 note(name:Atom octave:4 sharp:false duration:1.0 instrument:none)
       [] [N O] then
 	 note(name:{StringToAtom [N]} octave:{StringToInt [O]} sharp:false duration:1.0 instrument: none)
       [] "silence" then note(duration : 0.0)
@@ -43,7 +43,7 @@ fun {PartitionTimedList Partition}
 		     else {PartitionTimedListHelper Part.2 {ChordOrNoteToExtended Part.1}|L}
 		     end
 	 else 'You re not supposed to be here'
-	 
+	    
 	 end
       end
    in
@@ -81,7 +81,12 @@ fun {Stretch Factor Partition}
    local
       FlatPartition = {PartitionTimedList Partition}
       F = fun {$ Note}
-	     note(name:Note.name octave:Note.octave sharp:Note.sharp duration:Note.duration*Factor instrument:Note.instrument)
+	     case Note of
+		note(duration:Duration) then
+		note(duration:0.0)
+	     else
+		note(name:Note.name octave:Note.octave sharp:Note.sharp duration:Note.duration*Factor instrument:Note.instrument)
+	     end
 	  end	  
       fun {StretchHelper NoteL L}
 	 case NoteL
@@ -128,37 +133,42 @@ fun {Transpose Semitones Partition}
 	       {TransposeBis Semitones T {TransposeHelper Semitones H}|L}
 	    end
 	 end
-	 
       end
       fun {TransposeHelper N Note}
 	 local
 	    fun{TransposeHelperBis Note}
-	       if {And Note.name == c Note.sharp == false} then
-		  note(name:c octave:Note.octave sharp:true  duration:Note.duration instrument:Note.instrument)
-	       elseif {And Note.name == c Note.sharp == true} then
-		  note(name:d octave:Note.octave sharp:false  duration:Note.duration instrument:Note.instrument)
-	       elseif {And Note.name == d Note.sharp == false} then
-		  note(name:d octave:Note.octave sharp:true  duration:Note.duration instrument:Note.instrument)
-	       elseif {And Note.name == d Note.sharp == true} then
-		  note(name:e octave:Note.octave sharp:false  duration:Note.duration instrument:Note.instrument)	
-	       elseif {And Note.name == e Note.sharp == false} then
-		  note(name:f octave:Note.octave sharp:false  duration:Note.duration instrument:Note.instrument)	      
-	       elseif {And Note.name == f Note.sharp == false} then
-		  note(name:f octave:Note.octave sharp:true  duration:Note.duration instrument:Note.instrument)
-	       elseif {And Note.name == f Note.sharp == true} then
-		  note(name:g octave:Note.octave sharp:false  duration:Note.duration instrument:Note.instrument)
-	       elseif {And Note.name == g Note.sharp == false} then
-		  note(name:g octave:Note.octave sharp:true  duration:Note.duration instrument:Note.instrument)
-	       elseif {And Note.name == g Note.sharp == true} then
-		  note(name:a octave:Note.octave sharp:false  duration:Note.duration instrument:Note.instrument)
-	       elseif {And Note.name == a Note.sharp == false} then
-		  note(name:a octave:Note.octave sharp:true  duration:Note.duration instrument:Note.instrument)
-	       elseif {And Note.name == a Note.sharp == true} then
-		  note(name:b octave:Note.octave sharp:false  duration:Note.duration instrument:Note.instrument)
+	       case Note
+	       of note(duration:Duration) then
+		  note(duration:0.0)
 	       else
-		  note(name:c octave:Note.octave+1 sharp:false  duration:Note.duration instrument:Note.instrument)
+		  if {And Note.name == c Note.sharp == false} then
+		     note(name:c octave:Note.octave sharp:true  duration:Note.duration instrument:Note.instrument)
+		  elseif {And Note.name == c Note.sharp == true} then
+		     note(name:d octave:Note.octave sharp:false  duration:Note.duration instrument:Note.instrument)
+		  elseif {And Note.name == d Note.sharp == false} then
+		     note(name:d octave:Note.octave sharp:true  duration:Note.duration instrument:Note.instrument)
+		  elseif {And Note.name == d Note.sharp == true} then
+		     note(name:e octave:Note.octave sharp:false  duration:Note.duration instrument:Note.instrument)	
+		  elseif {And Note.name == e Note.sharp == false} then
+		     note(name:f octave:Note.octave sharp:false  duration:Note.duration instrument:Note.instrument)	      
+		  elseif {And Note.name == f Note.sharp == false} then
+		     note(name:f octave:Note.octave sharp:true  duration:Note.duration instrument:Note.instrument)
+		  elseif {And Note.name == f Note.sharp == true} then
+		     note(name:g octave:Note.octave sharp:false  duration:Note.duration instrument:Note.instrument)
+		  elseif {And Note.name == g Note.sharp == false} then
+		     note(name:g octave:Note.octave sharp:true  duration:Note.duration instrument:Note.instrument)
+		  elseif {And Note.name == g Note.sharp == true} then
+		     note(name:a octave:Note.octave sharp:false  duration:Note.duration instrument:Note.instrument)
+		  elseif {And Note.name == a Note.sharp == false} then
+		     note(name:a octave:Note.octave sharp:true  duration:Note.duration instrument:Note.instrument)
+		  elseif {And Note.name == a Note.sharp == true} then
+		     note(name:b octave:Note.octave sharp:false  duration:Note.duration instrument:Note.instrument)
+		  else
+		     note(name:c octave:Note.octave+1 sharp:false  duration:Note.duration instrument:Note.instrument)
+		  end
 	       end
 	    end
+	    
 	 in
 	    if N==0 then Note
 	    else
