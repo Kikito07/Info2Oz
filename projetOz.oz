@@ -42,15 +42,13 @@ fun {PartitionTimedList Partition}
 		     []	transpose(semitones:Integer P) then {PartitionTimedListHelper Part.2 {Transpose H.semitones H.1}|L}
 		     else {PartitionTimedListHelper Part.2 {ChordOrNoteToExtended Part.1}|L}
 		     end
-	 else 'You re not supposed to be here'
-	    
+	 else 'You re not supposed to be here'   
 	 end
       end
    in
       {PartitionTimedListHelper Partition nil}
    end
 end
-
 
 fun {Duration Duration Partition}
    local FlatPartition = {PartitionTimedList Partition}
@@ -69,7 +67,7 @@ fun {Duration Duration Partition}
    in
       Total = {TotalDuration FlatPartition 0.0}
       if Total == 0.0 then
-	 {Stretch 0.0 FlatPartition}
+	 FlatPartition
       else
 	 {Stretch (Duration/Total) FlatPartition}
       end
@@ -168,7 +166,6 @@ fun {Transpose Semitones Partition}
 		  end
 	       end
 	    end
-	    
 	 in
 	    if N==0 then Note
 	    else
@@ -182,14 +179,9 @@ fun {Transpose Semitones Partition}
 end
 
 local
-   Partition = [a a b g a stretch(factor:0.5 [b c5]) b g a drone(note:a amount:5) b a g a L duration(seconds:2.0 [a b c d])]
-   L = transpose(semitones:3 [d])
+   Partition = [L a b g a stretch(factor:0.5 [b c5]) b g a drone(note:a amount:5) b a g a L duration(seconds:2.0 [a b c d])]
+   L = transpose(semitones:3 [silence a])
    M = [[a b c] d e f]
 in
    {Browse {PartitionTimedList Partition}}
 end
-
-	   
-	   
-	
-	
