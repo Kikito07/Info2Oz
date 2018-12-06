@@ -172,16 +172,13 @@ fun {Transpose Semitones Partition}
 end
 
 
-
+declare
 fun {Mix P2T Music}
    local
       FlatPartition = {P2T Music}
-      fun {MixHelper Note Index L}
+      fun {MixHelper Note Index}
 	 local
-	    Length = Note.duration*44100.0
 	    Numvalue
-	    Height
-	    F
 	 in
 	    if {And Note.name == c Note.sharp == false} then
 	       Numvalue = 1
@@ -207,51 +204,42 @@ fun {Mix P2T Music}
 	       Numvalue = 11
 	    elseif {And Note.name == b Note.sharp == false} then
 	       Numvalue = 12
-	    else
-	       skip
 	    end
-<<<<<<< Updated upstream:ProjetOzPart2Nouvelle
-	    Height = {Int.toFloat (Numvalue - 10) + (( Note.octave - 4)*12)}
-	    F = {Number.pow 2.0 Height/12.0}*440.0
-	    (1.0/2.0)*{Float.sin (2.0*3.14159265359*F*Index/44100.0)}
-<<<<<<< Updated upstream:ProjetOzPart2Nouvelle
-=======
-	    (1.0/2.0)*{Float.sin (2.0*3.14159265359*{Number.pow 2.0 {Int.toFloat (Numvalue - 10) + (( Note.octave - 4)*12)}/12.0}*440.0*Index/44100.0)}
-
-=======
-	    if Index > Length then L
-	    else
-	       {MixHelper Note Index+1 (1.0/2.0)*{Float.sin (2.0*3.14159265359*{Number.pow 2.0 {Int.toFloat (Numvalue - 10) + (( Note.octave - 4)*12)}/12.0}*440.0*Index/44100.0)}|L}
-	    end
->>>>>>> Stashed changes:ProjetOzPart2Nouvelle.oz
->>>>>>> Stashed changes:ProjetOzPart2Nouvelle.oz
+	    (1.0/2.0)*{Float.sin 2.0*3.14159865359 *({Number.pow 2.0 {Int.toFloat (Numvalue - 10) + (( Note.octave - 4)*12)}/12.0}*440.0)*Index/44100.0}
 	 end
       end
       
-      fun {MixHelperBis Fpartition Index LS}
-	 case Fpartition of nil then
-	    {List.reverse LS}
+      fun {MixBis FPartition I A}
+	 case FPartition
+	 of nil then {List.reverse A}
 	 [] H|T then
-	    case H of K|L then
-	       {MixHelperBis T (Index + 1.0) {FoldR {MixHelperBis L Index {MisHelper K}|nil} fun {$ X Y} X + Y end 0.0}|LS}
+	    case H
+	    of K|L then {MixBis T I + 1.0 {FoldR {MixBis L I {MixHelper K I}} fun {$ X Y} X + Y end 0.0}|A}
+	    else
+	       {MixBis T I + 1.0 {MixHelper H I}|A}
 	    end
-	 else	
-	    {MixHelperBis Fpartition.2 (Index + 1.0) {MixHelper Fpartition.1 Index}|LS}
 	 end
       end
    in
-      {MixHelperBis FlatPartition 0.0 nil}
+      {MixBis FlatPartition 1.0 nil}
    end
 end
 
+      
+      
+      
+
+      {Browse {MixHelper {NoteToExtended a} 1.0}}
+    
 
 
-
+{Browse {Mix PartitionTimedList [a b c]}}
+{Browse {PartitionTimedList [a b c]}}
 
 
 declare
 fun{Reverse Music}
-   {Reverse {Mix P2T Music}}
+   {List.reverse {Mix P2T Music}}
 end
 
 fun{Repeat Amount Music}
@@ -269,45 +257,162 @@ fun{Repeat Amount Music}
 end
 
 declare
-fun {Merge L}
-   local
+fun {Merge MusicList}
+   local 								     
       fun {Sum L1 L2 Ans}
-	 if {And L1 == nil L2 == nil} then {Reverse Ans}
+	 if {And L1 == nil L2 == nil} then {Reverse  Ans}
 	 elseif {And L1 \= nil L2 == nil} then {Sum L1.2 nil (L1.1|Ans)}
 	 elseif {And L1 == nil L2 \= nil} then {Sum nil L2.2 (L2.1|Ans)}	   
 	 else
 	    {Sum L1.2 L2.2 (L1.1 + L2.1)|Ans}
 	 end
       end
-      
       fun {MergeHelper L Acc}
 	 if L == nil then Acc
 	 else
-	    {MergeHelper L.2 {Sum Acc {Map L.1.2 fun {$ X} X*L.1.1 end} nil}}
+	    {MergeHelper L.2 {Sum {Map L.1.2 fun {$ X} X*L.1.1 end}  Acc nil}}
 	 end
       end
    in
-      {MergeHelper L nil}
+      {MergeHelper MusicList nil}
    end
 end
+
+local
+   X = [3.0#[1.0 2.0 3.0] 4.0#[5.0 6.0] 3.0#[1.0 2.2 4.1 5.0]]
+in
+   {Browse {Merge X}}
+end
+
+
 
 declare
 fun{Loop Duration Music}
    local
-      fun {LoopHelper Duration Music Acc}
-	 local
-	    Samples = Music
-	 in 
-	    if {And Music == nil Duration < 0.0} then {Reverse Acc.2}
-	    elseif {And Music == nil Duration \= 0.0} then {LoopHelper Duration-{Int.toFloat {Length Samples.1}}/44100.0 Samples.2 Samples.1|Acc}
-	    else {LoopHelper Duration-{Int.toFloat {Length Music.1}}/44100.0 Music.2 Music.1|Acc}
-	    end
+      TrueDuration = Duration*44100.0
+      fun {LoopHelper TDuration Music FixedMusic A}
+	 if TDuration =< 0.0 then A
+	 elseif Music == nil then {LoopHelper (TDuration - 1.0) FixedMusic.2 FixedMusic FixedMusic.1|A}
+	 else
+	    {LoopHelper TDuration - 1.0 Music.2 FixedMusic Music.1|A}
 	 end
       end
    in
-      {LoopHelper Duration Music nil}
+      {LoopHelper TrueDuration Music Music nil}
    end
 end
+
+{Browse {Loop 10.0 [0.2 0.6 5.0 6.0 7.0]}}
+
+end
+
+declare
+fun {Clip Low High Music}
+   local
+      fun{ClipHelper Low High L Acc}
+	 if L == nil then {Reverse Acc}
+	 elseif L.1 < Low then {ClipHelper Low High L.2 Low|Acc}
+	 elseif L.1 > High then {ClipHelper Low High L.2 High|Acc}
+	 else {ClipHelper Low High L.2 L.1|Acc}
+	 end
+      end
+   in
+      {ClipHelper Low High Music nil}
+   end
+end
+
+{Browse {Clip ~0.5 0.5 [4.5 1.5 0.3 ~0.3 ~0.5]}}
+
+local
+declare
+fun{Echo Duration Factor Music}
+   local
+      TrueDuration = Duration*44100.0
+      fun{Silence Duration Acc}
+	 if Duration =< 0.0 then Acc
+	 else {Silence Duration-1.0 0.0|Acc}
+	 end
+      end
+      
+   in
+      {Merge [Factor#Music 1.0#{Append {Silence TrueDuration nil} Music}]}
+   end
+end
+
+declare
+ fun{Silence Duration Acc}
+	 if Duration =< 0.0 then Acc
+	 else {Silence Duration-1.0 0.0|Acc}
+	 end
+ end
+
+{Browse {Append {Silence 3.0 nil} [1.0 5.0 9.0]}}
+{Browse {Echo 1.0 1.0 [1.0 5.0 9.0 2.0 1.0 1.2 1.3 1.4 1.5]}}
+
+declare
+fun {Fade Start Out Music}
+   local
+      TrueStart = Start*44100.0
+      TrueOut = Out*44100.0
+      
+      fun {FadeHelper Start FixedSart Out Music A}
+	 if {Length A} <= 0.0 then A
+	 elseif {FadeHelper 1-1/FixedStart FixedSart Out Music.2 Music.1*} 
+	    
+end
+
+
+declare
+fun {Cut Start Finish Music}
+   local
+      fun {CutHelper Start Finish Music A}
+	 if {Finish =< 0.0} then A
+	 elseif Music == nil then {CutHelper Start-1.0 Finish-1.0 Music 0.0|A}	 
+	 elseif Start >= 0.0 then {CutHelper Start-1.0 Finish-1.0 Music.2 A}
+	 elseif {And Start < 0 Finish >0} then {CutHelper Start-1.0 Finish-1.0 Music.2 Music.1|A}
+	 else
+	    'problème'
+	 end
+      end
+   in
+      {CutHelper Start Finish Music nil}
+   end
+end
+
+
+{Browse {Cut 0.0 1.0 [1.0 2.0]}}
+
+   
+   
+	 
+						 
+	 
+      TrueStart = Start*44100
+      TrueFinish = Finish*44100
+      Long = {List.length Music}
+   in
+      if(Long-TrueFinish + 1) < 0 then 
+      else
+	 {List.reverse {List.drop {List.reverse {List.drop Music TrueStart}} Long-TrueFinish+1}}
+      end
+   end
+end
+
+
+{Browse {Cut 3 8 [1 2 3 4 5 6 7 8 9 10]}}
+   
+
+
+	 
+
+{Browse {Copie [[1.0 2.0 3.5 0.0 0.1] [2.2 3.3 4.4] [123.456 0.0 ~21.0]]}}
+
+     
+   
+
+
+
+      
 local
    Music
    [Project] = {Link ['D:/unif/2018-2019/info2/ProjetOz/Info2Oz/Project2018.ozf']}
@@ -332,29 +437,13 @@ local
 	 end
       end
    end
-   
-   fun {Loop Duration Music}
-      local
-	 fun {LoopHelper Duration Music Acc}
-	    local
-	       Samples = Music
-	    in 
-	       if Duration < 0.0 then {Reverse Acc.2}
-	       elseif Music == nil then {LoopHelper Duration-{Int.toFloat {Length Samples.1}} Samples.2 Samples.1|Acc}
-	       else {LoopHelper Duration-{Int.toFloat {Length Music.1}} Music.2 Music.1|Acc}
-	       end
-	    end
-	 end
-      in
-	 {LoopHelper Duration Music nil}
-      end
-   end
-   
+    
    fun {Mix P2T Music}
-      {Repeat 10 {Project.readFile 'D:/unif/2018-2019/info2/ProjetOz/Info2Oz/wave/animals/owl.wav'}}
+      {Cut 3 7 {Loop 10.0 {Project.readFile 'D:/unif/2018-2019/info2/ProjetOz/Info2Oz/wave/animals/monkey.wav'}}}
    end
    
 in
+   
    Music = {Project.load 'D:/unif/2018-2019/info2/ProjetOz/Info2Oz/joy.dj.oz'}
    {ForAll [NoteToExtended Music] Wait}
    {Browse {Project.run Mix PartitionToTimedList Music 'D:/unif/2018-2019/info2/ProjetOz/Info2Oz/test/out.wav'}}	 

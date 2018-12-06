@@ -30,7 +30,7 @@ fun {ChordOrNoteToExtended ChordOrNote}
    end
 end
 
-fun {PartitionTimedList Partition}
+fun {PartitionToTimedList Partition}
    local
       fun {PartitionTimedListHelper Part L}
 	 case Part
@@ -51,7 +51,7 @@ fun {PartitionTimedList Partition}
 end
 
 fun {Duration Duration Partition}
-   local FlatPartition = {PartitionTimedList Partition}
+   local FlatPartition = {PartitionToTimedList Partition}
       Total
       fun {TotalDuration L Sum}
 	 case L
@@ -77,7 +77,7 @@ end
 
 fun {Stretch Factor Partition}
    local
-      FlatPartition = {PartitionTimedList Partition}
+      FlatPartition = {PartitionToTimedList Partition}
       F = fun {$ Note}
 	     case Note of
 		note(duration:Duration) then
@@ -117,10 +117,9 @@ fun {Drone ChordOrNote Amount}
    end   
 end
 
-
 fun {Transpose Semitones Partition}
    local
-      FlatPartition = {PartitionTimedList Partition}
+      FlatPartition = {PartitionToTimedList Partition}
       fun {TransposeBis Semitones FlatP L}
 	 case FlatP
 	 of nil then {Reverse L}
@@ -183,5 +182,5 @@ local
    L = transpose(semitones:3 [silence a])
    M = [[a b c] d e f]
 in
-   {Browse {PartitionTimedList Partition}}
+   {Browse {PartitionToTimedList Partition}}
 end
