@@ -175,23 +175,26 @@ end
 declare
 fun {Mix P2T Music}
    local
-      fun{MixHelper2 P2T music Acc}
+      fun{MixHelper2 P2T Music Acc}
 	 case Music
 	 of nil
 	 then Acc
 	 [] H|T
 	    case H
-	    of sample(Samples) then {Cut ~1 1 Sample}|Acc
-	    [] partition(Partition) then {MixBis {P2T Partition} 1.0 nil}|Acc
+	    of case K|L then
+		  if {Float.is K} then {Clip ~1 1 H}|Acc
+		  else {MixBis {P2T Partition} 1.0 nil}|Acc
+		  end
+	       end
 	    [] wave(Filename) then {Wave Filename}|Acc
-	    [] merge(Musics) then {Merge musics}
+	    [] merge(Musics) then {Merge Musics}
 	    [] reverse(Music) then {Reverse Music}
 	    [] repeat(amount:Integer Music) then {Repeat Integer Music}
-	    [] loop(seconds:Duration Music) then {Loop Duration music}
+	    [] loop(seconds:Duration Music) then {Loop Duration Music}
 	    [] clip(low:Low high:High Music) then {Clip Low High Music}
 	    [] echo(delay:Duration decay:Factor Music) then {Echo Duration Factor Music]
 	    [] fade(start:Dur1 out:Dur2 Music) then {Fade Dur1 Dur2 Music}
-	    [] cut(Start:Dur1 finish:Dur2 Music) then {Cut Dur1 Dur2 Music)
+	    [] cut(start:D1 finish:D2 Music) then {Cut D1 D2 Music)
 	    end
 	 end
       end	 
@@ -430,3 +433,56 @@ in
    {ForAll [NoteToExtended Music] Wait}
    {Browse {Project.run Mix PartitionToTimedList Music 'D:/unif/2018-2019/info2/ProjetOz/Info2Oz/test/out.wav'}}	 
 end
+
+
+declare
+fun {MixHelper Note Index}
+   local
+      Numvalue
+   in
+      case Note
+      of note(duration:Duration) then  note(duration:0.0)
+      else
+	 
+	 if {And Note.name == c Note.sharp == false} then
+	    Numvalue = 1
+	 elseif {And Note.name == c Note.sharp == true} then
+	    Numvalue = 2
+	 elseif {And Note.name == d Note.sharp == false} then
+	    Numvalue = 3
+	 elseif {And Note.name == d Note.sharp == true} then
+	    Numvalue = 4
+	 elseif {And Note.name == e Note.sharp == false} then
+	    Numvalue = 5
+	 elseif {And Note.name == f Note.sharp == false} then
+	    Numvalue = 6
+	 elseif {And Note.name == f Note.sharp == true} then
+	    Numvalue = 7
+	 elseif {And Note.name == g Note.sharp == false} then
+	    Numvalue = 8
+	 elseif {And Note.name == g Note.sharp == true} then
+	    Numvalue = 9
+	 elseif {And Note.name == a Note.sharp == false} then
+	    Numvalue = 10
+	 elseif {And Note.name == a Note.sharp == true} then
+	    Numvalue = 11
+	 elseif {And Note.name == b Note.sharp == false} then
+	    Numvalue = 12
+	 end
+      end
+      (1.0/2.0)*{Float.sin 2.0*3.14159865359 *({Number.pow 2.0 {Int.toFloat (Numvalue - 10) + (( Note.octave - 4)*12)}/12.0}*440.0)*Index/44100.0}
+   end
+end
+
+fun {MixBis FPartition I A}
+   case FPartition
+   of nil then {List.reverse A}
+   [] H|T then
+      case H
+      of K|L then {MixBis T I + 1.0 {FoldR {MixBis L I {MixHelper K I}} fun {$ X Y} X + Y end 0.0}|A}
+      else
+	 {MixBis T I + 1.0 {MixHelper H I}|A}
+      end
+   end
+end
+

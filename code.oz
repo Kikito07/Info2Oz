@@ -185,6 +185,7 @@ local
   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   
+  
   fun {Mix P2T Music}
      local
 	fun{MixHelper2 P2T Music Acc}
@@ -193,8 +194,11 @@ local
 	   then Acc
 	   [] H|T
 	      case H
-	      of sample(Samples) then {Clip ~1 1 Samples}|Acc
-	      [] partition(Partition) then {MixBis {P2T Partition} 1.0 nil}|Acc
+	      of case K|L then
+		    if {Float.is K} then {Clip ~1 1 H}|Acc
+		    else {MixBis {P2T Partition} 1.0 nil}|Acc
+		    end
+		 end
 	      [] wave(Filename) then {Wave Filename}|Acc
 	      [] merge(Musics) then {Merge Musics}
 	      [] reverse(Music) then {Reverse Music}
@@ -206,54 +210,61 @@ local
 	      [] cut(start:D1 finish:D2 Music) then {Cut D1 D2 Music)
 	      end
 	   end
-	end	 
+	end	 	 
 	
 	fun {MixHelper Note Index}
 	   local
+	      
+	      Height
+	      F
 	      Numvalue
 	   in
-	      case Note
-	      of note(duration:Duration) then  note(duration:0.0)
+	      if Note.duration==0.0 then Numvalue = 0
+	      elseif {And Note.name == c Note.sharp == false} then
+		 Numvalue = 1
+	      elseif {And Note.name == c Note.sharp == true} then
+		 Numvalue = 2
+	      elseif {And Note.name == d Note.sharp == false} then
+		 Numvalue = 3
+	      elseif {And Note.name == d Note.sharp == true} then
+		 Numvalue = 4
+	      elseif {And Note.name == e Note.sharp == false} then
+		 Numvalue = 5
+	      elseif {And Note.name == f Note.sharp == false} then
+		 Numvalue = 6
+	      elseif {And Note.name == f Note.sharp == true} then
+		 Numvalue = 7
+	      elseif {And Note.name == g Note.sharp == false} then
+		 Numvalue = 8
+	      elseif {And Note.name == g Note.sharp == true} then
+		 Numvalue = 9
+	      elseif {And Note.name == a Note.sharp == false} then
+		 Numvalue = 10
+	      elseif {And Note.name == a Note.sharp == true} then
+		 Numvalue = 11
+	      elseif {And Note.name == b Note.sharp == false} then
+		 Numvalue = 12
+	      end
+	      if Numvalue == 0 then 0
 	      else
 		 
-		 if {And Note.name == c Note.sharp == false} then
-		    Numvalue = 1
-		 elseif {And Note.name == c Note.sharp == true} then
-		    Numvalue = 2
-		 elseif {And Note.name == d Note.sharp == false} then
-		    Numvalue = 3
-		 elseif {And Note.name == d Note.sharp == true} then
-		    Numvalue = 4
-		 elseif {And Note.name == e Note.sharp == false} then
-		    Numvalue = 5
-		 elseif {And Note.name == f Note.sharp == false} then
-		    Numvalue = 6
-		 elseif {And Note.name == f Note.sharp == true} then
-		    Numvalue = 7
-		 elseif {And Note.name == g Note.sharp == false} then
-		    Numvalue = 8
-		 elseif {And Note.name == g Note.sharp == true} then
-		    Numvalue = 9
-		 elseif {And Note.name == a Note.sharp == false} then
-		    Numvalue = 10
-		 elseif {And Note.name == a Note.sharp == true} then
-		    Numvalue = 11
-		 elseif {And Note.name == b Note.sharp == false} then
-		    Numvalue = 12
-		 end
+		 Height = {Int.toFloat (Numvalue - 10) + (( Note.octave - 4)*12)}
+		 F = {Number.pow 2.0 Height/12.0}*440.0
+		 (1.0/2.0)*{Float.sin (2.0*3.14159265359*F*Index/44100.0)}
 	      end
-	      (1.0/2.0)*{Float.sin 2.0*3.14159865359 *({Number.pow 2.0 {Int.toFloat (Numvalue - 10) + (( Note.octave - 4)*12)}/12.0}*440.0)*Index/44100.0}
+	      
 	   end
 	end
+	
 	
 	fun {MixBis FPartition I A}
 	   case FPartition
 	   of nil then {List.reverse A}
 	   [] H|T then
 	      case H
-	      of K|L then {MixBis T I + 1.0 {FoldR {MixBis L I {MixHelper K I}} fun {$ X Y} X + Y end 0.0}|A}
+	      of K|L then {MixBis T (I + 1.0) {FoldR {MixBis L I {MixHelper K I}|nil} fun {$ X Y} X + Y end 0.0}|A}
 	      else
-		 {MixBis T I + 1.0 {MixHelper H I}|A}
+		 {MixBis T (I + 1.0) {MixHelper H I}|A}
 	      end
 	   end
 	end
@@ -347,6 +358,44 @@ local
      else {Silence Duration-1.0 0.0|Acc}
      end
   end
+
+ 
+  fun {Cut Start Finish Music}
+     local
+	Samples = {Mix P2T Music}
+	TrueStart = Start*44100.0
+	TrueFinish = Finish*44100.0
+	fun{CutHelper S F Mus A}
+	   if F =< 1.0 then {Reverse A}
+	   elseif {And Mus == nil S >= 1.0} then {CutHelper S-1.0 F -1.0 Mus A}
+	   elseif {And Mus == nil S =< 0.0} then {CutHelper S-1.0 F -1.0 Mus 0.0|A}
+	   elseif S > 0.0 then {CutHelper S -1.0 F -1.0 Mus.2 A}
+	   else {CutHelper S - 1.0 F - 1.0 Mus.2 Mus.1|A}
+	   end
+	end
+     in
+	{CutHelper TrueStart TrueFinish Samples nil}
+     end
+  end
+  
+fun {Fade Start Out Music}
+   local
+      Samples = {Mix P2T Music}
+      TrueStart = Start*44100.0
+      TrueOut = Out*44100.0
+      S = {Cut 0.0 TrueStart + 1.0 Samples}
+      M = {Cut TrueOut Out Samples}
+      O = {Cut TrueOut-2.0 {Int.toFloat {Length Samples} + 1} Music}
+      fun {FadeBis L X FixedStart A}
+	 if L == nil then {Reverse A}
+	 else
+	    {FadeBis L.2 X+1.0/FixedStart FixedStart X*L.1|A}
+	 end
+      end
+   in
+      {Append {Append {FadeBis S 0.0 TrueStart nil} M} {Reverse {FadeBis O 0.0 TrueOut nil}}}  
+   end
+end
   
   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
