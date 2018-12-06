@@ -1,0 +1,36 @@
+declare
+fun {Cut Start Finish Music}
+   local
+      fun{CutHelper S F Mus A}
+	 if F =< 1.0 then {Reverse A}
+	 elseif {And Mus == nil S >= 1.0} then {CutHelper S-1.0 F -1.0 Mus A}
+	 elseif {And Mus == nil S =< 0.0} then {CutHelper S-1.0 F -1.0 Mus 0.0|A}
+	 elseif S > 0.0 then {CutHelper S -1.0 F -1.0 Mus.2 A}
+	 else {CutHelper S - 1.0 F - 1.0 Mus.2 Mus.1|A}
+	 end
+      end
+   in
+      {CutHelper Start Finish Music nil}
+   end
+end
+declare
+fun {Fade Start Out Music}
+   local
+      S = {Cut 0.0 Start + 1.0 Music}
+      M = {Cut Start Out Music}
+      O = {Cut Out-2.0 {Int.toFloat {Length Music} + 1} Music}
+      fun {FadeBis L X FixedStart A}
+	 if L == nil then {Reverse A}
+	 else
+	    {FadeBis L.2 X+1.0/FixedStart FixedStart X*L.1|A}
+	 end
+      end
+      in
+	{Append {Append {FadeBis S 0.0 Start nil} M} {Reverse {FadeBis O 0.0 Out nil}}}  
+   end
+end
+
+{Browse {Fade 2.0 6.0 [1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0]}}
+
+	     
+

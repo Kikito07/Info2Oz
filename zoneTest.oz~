@@ -1,0 +1,20 @@
+declare
+fun {Cut Start Finish Music}
+   local
+      fun{CutHelper S F Mus A}
+	 if F < 0.0 then {Reverse A}
+	 elseif Mus == nil then {CutHelper S -1.0 F -1.0 Mus 0.0|A}
+	 elseif S > 0.0 then {CutHelper S -1.0 F -1.0 Mus.2 A}
+	 else {CutHelper S - 1.0 F - 1.0 Mus.2 Mus.1|A}
+	 end
+      end
+   in
+      {CutHelper Start Finish Music nil}
+   end
+end
+
+
+{Browse{Cut 12.0 15.0 [1 2 3 4 5 6 7 8 9 10]}}
+	    
+	    
+	    

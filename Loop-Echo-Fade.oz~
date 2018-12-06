@@ -30,7 +30,7 @@ fun {ChordOrNoteToExtended ChordOrNote}
    end
 end
 
-fun {PartitionTimedList Partition}
+fun {PartitionToTimedList Partition}
    local
       fun {PartitionTimedListHelper Part L}
 	 case Part
@@ -53,7 +53,7 @@ end
 
 
 fun {Duration Duration Partition}
-   local FlatPartition = {PartitionTimedList Partition}
+   local FlatPartition = {PartitionToTimedList Partition}
       Total
       fun {TotalDuration L Sum}
 	 case L
@@ -79,7 +79,7 @@ end
 
 fun {Stretch Factor Partition}
    local
-      FlatPartition = {PartitionTimedList Partition}
+      FlatPartition = {PartitionToTimedList Partition}
       F = fun {$ Note}
 	     note(name:Note.name octave:Note.octave sharp:Note.sharp duration:Note.duration*Factor instrument:Note.instrument)
 	  end	  
@@ -175,41 +175,62 @@ end
 declare
 fun {Mix P2T Music}
    local
-      FlatPartition = {P2T Music}
-      fun {MixHelper Note Index LS}
+      fun{MixHelper2 P2T music Acc}
+	 case Music
+	 of nil
+	 then Acc
+	 [] H|T
+	    case H
+	    of sample(Samples) then {Cut ~1 1 Sample}|Acc
+	    [] partition(Partition) then {MixBis {P2T Partition} 1.0 nil}|Acc
+	    [] wave(Filename) then {Wave Filename}|Acc
+	    [] merge(Musics) then {Merge musics}
+	    [] reverse(Music) then {Reverse Music}
+	    [] repeat(amount:Integer Music) then {Repeat Integer Music}
+	    [] loop(seconds:Duration Music) then {Loop Duration music}
+	    [] clip(low:Low high:High Music) then {Clip Low High Music}
+	    [] echo(delay:Duration decay:Factor Music) then {Echo Duration Factor Music]
+	    [] fade(start:Dur1 out:Dur2 Music) then {Fade Dur1 Dur2 Music}
+	    [] cut(Start:Dur1 finish:Dur2 Music) then {Cut Dur1 Dur2 Music)
+	    end
+	 end
+      end	 
+      
+      fun {MixHelper Note Index}
 	 local
 	    Numvalue
 	 in
-	    if {And Note.name == c Note.sharp == false} then
-	       Numvalue = 1
-	    elseif {And Note.name == c Note.sharp == true} then
-	       Numvalue = 2
-	    elseif {And Note.name == d Note.sharp == false} then
-	       Numvalue = 3
-	    elseif {And Note.name == d Note.sharp == true} then
-	       Numvalue = 4
-	    elseif {And Note.name == e Note.sharp == false} then
-	       Numvalue = 5
-	    elseif {And Note.name == f Note.sharp == false} then
-	       Numvalue = 6
-	    elseif {And Note.name == f Note.sharp == true} then
-	       Numvalue = 7
-	    elseif {And Note.name == g Note.sharp == false} then
-	       Numvalue = 8
-	    elseif {And Note.name == g Note.sharp == true} then
-	       Numvalue = 9
-	    elseif {And Note.name == a Note.sharp == false} then
-	       Numvalue = 10
-	    elseif {And Note.name == a Note.sharp == true} then
-	       Numvalue = 11
-	    elseif {And Note.name == b Note.sharp == false} then
-	       Numvalue = 12
+	    case Note
+	    of note(duration:Duration) then  note(duration:0.0)
 	    else
-	       skip
+	       
+	       if {And Note.name == c Note.sharp == false} then
+		  Numvalue = 1
+	       elseif {And Note.name == c Note.sharp == true} then
+		  Numvalue = 2
+	       elseif {And Note.name == d Note.sharp == false} then
+		  Numvalue = 3
+	       elseif {And Note.name == d Note.sharp == true} then
+		  Numvalue = 4
+	       elseif {And Note.name == e Note.sharp == false} then
+		  Numvalue = 5
+	       elseif {And Note.name == f Note.sharp == false} then
+		  Numvalue = 6
+	       elseif {And Note.name == f Note.sharp == true} then
+		  Numvalue = 7
+	       elseif {And Note.name == g Note.sharp == false} then
+		  Numvalue = 8
+	       elseif {And Note.name == g Note.sharp == true} then
+		  Numvalue = 9
+	       elseif {And Note.name == a Note.sharp == false} then
+		  Numvalue = 10
+	       elseif {And Note.name == a Note.sharp == true} then
+		  Numvalue = 11
+	       elseif {And Note.name == b Note.sharp == false} then
+		  Numvalue = 12
+	       end
 	    end
-	    
-	    {MixHelper Note Index+1.0 (1.0/2.0)*{Float.sin (2.0*3.14159265359*{Number.pow 2.0 {Int.toFloat (Numvalue - 10) + (( Note.octave - 4)*12)}/12.0}*440.0*Index/44100.0)}|LS}
-	    
+	    (1.0/2.0)*{Float.sin 2.0*3.14159865359 *({Number.pow 2.0 {Int.toFloat (Numvalue - 10) + (( Note.octave - 4)*12)}/12.0}*440.0)*Index/44100.0}
 	 end
       end
       
@@ -218,28 +239,16 @@ fun {Mix P2T Music}
 	 of nil then {List.reverse A}
 	 [] H|T then
 	    case H
-	    of K|L then {MixBis T I + 1.0 {FoldR {MixBis L I {MixHelper K I nil}} fun {$ X Y} X + Y end 0.0}|A}
+	    of K|L then {MixBis T I + 1.0 {FoldR {MixBis L I {MixHelper K I}} fun {$ X Y} X + Y end 0.0}|A}
 	    else
-	       {MixBis T I + 1.0 {MixHelper H I nil}|A}
+	       {MixBis T I + 1.0 {MixHelper H I}|A}
 	    end
 	 end
       end
    in
-      {MixBis FlatPartition 1.0 nil}
+      {MixHelper2 P2T music Acc}
    end
 end
-
-      
-      
-      
-
-      {Browse {MixHelper {NoteToExtended a} 1.0}}
-    
-
-
-{Browse {Mix PartitionTimedList [a b c]}}
-{Browse {PartitionTimedList [a b c]}}
-
 
 declare
 fun{Reverse Music}
@@ -247,7 +256,7 @@ fun{Reverse Music}
 end
 
 fun{Repeat Amount Music}
-   local
+   local Samples = {Mix P2T Music}
       fun {RepeatHelper X N L}
 	 case N
 	 of 0 then L
@@ -256,7 +265,7 @@ fun{Repeat Amount Music}
 	 end
       end
    in
-      {RepeatHelper Music Amount nil}
+      {RepeatHelper Samples Amount nil}
    end
 end
 
@@ -274,7 +283,7 @@ fun {Merge MusicList}
       fun {MergeHelper L Acc}
 	 if L == nil then Acc
 	 else
-	    {MergeHelper L.2 {Sum {Map L.1.2 fun {$ X} X*L.1.1 end}  Acc nil}}
+	    {MergeHelper L.2 {Sum {Map {Mix P2T L.1.2} fun {$ X} X*L.1.1 end}  Acc nil}}
 	 end
       end
    in
@@ -293,6 +302,7 @@ end
 declare
 fun{Loop Duration Music}
    local
+      Samples = {Mix P2T Music}
       TrueDuration = Duration*44100.0
       fun {LoopHelper TDuration Music FixedMusic A}
 	 if TDuration =< 0.0 then A
@@ -302,7 +312,7 @@ fun{Loop Duration Music}
 	 end
       end
    in
-      {LoopHelper TrueDuration Music Music nil}
+      {LoopHelper TrueDuration Samples Samples nil}
    end
 end
 
@@ -313,6 +323,7 @@ end
 declare
 fun {Clip Low High Music}
    local
+      Samples = {Mix P2T Music}
       fun{ClipHelper Low High L Acc}
 	 if L == nil then {Reverse Acc}
 	 elseif L.1 < Low then {ClipHelper Low High L.2 Low|Acc}
@@ -321,7 +332,7 @@ fun {Clip Low High Music}
 	 end
       end
    in
-      {ClipHelper Low High Music nil}
+      {ClipHelper Low High Sample nil}
    end
 end
 
@@ -344,11 +355,11 @@ fun{Echo Duration Factor Music}
 end
 
 declare
- fun{Silence Duration Acc}
-	 if Duration =< 0.0 then Acc
-	 else {Silence Duration-1.0 0.0|Acc}
-	 end
- end
+fun {Silence Duration Acc}
+   if Duration =< 0.0 then Acc
+   else {Silence Duration-1.0 0.0|Acc}
+   end
+end
 
 {Browse {Append {Silence 3.0 nil} [1.0 5.0 9.0]}}
 {Browse {Echo 1.0 1.0 [1.0 5.0 9.0 2.0 1.0 1.2 1.3 1.4 1.5]}}
@@ -363,9 +374,9 @@ fun {Fade Start Out Music}
 	 if {Length A} <= 0.0 then A
 	 elseif {FadeHelper 1-1/FixedStart FixedSart Out Music.2 Music.1*} 
 	    
-end
-
-
+	 end
+	 
+	 
 declare
 fun {Cut Start Finish Music}
    local

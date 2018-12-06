@@ -27,23 +27,23 @@ local
   
   fun {ChordToExtended Chord}
      {List.map Chord NoteToExtended}
-  end
-  
-  fun {ChordOrNoteToExtended ChordOrNote}
-     case ChordOrNote of H|T then
-	{ChordToExtended ChordOrNote}
+   end
+   
+   fun {ChordOrNoteToExtended ChordOrNote}
+      case ChordOrNote of H|T then
+	 {ChordToExtended ChordOrNote}
      else
-	{NoteToExtended ChordOrNote}
-     end
-  end
-  
-  fun {PartitionToTimedList Partition}
-     local
-	fun {PartitionTimedListHelper Part L}
-	   case Part
-	   of nil then {List.reverse L}
-	   [] H|T then case H
-		       of duration(seconds:Dur P) then {PartitionTimedListHelper Part.2 {Duration H.seconds H.1}|L}
+	 {NoteToExtended ChordOrNote}
+      end
+   end
+   
+   fun {PartitionToTimedList Partition}
+      local
+	 fun {PartitionTimedListHelper Part L}
+	    case Part
+	    of nil then {List.reverse L}
+	    [] H|T then case H
+			of duration(seconds:Dur P) then {PartitionTimedListHelper Part.2 {Duration H.seconds H.1}|L}
 		       [] stretch(factor:Factor P) then {PartitionTimedListHelper Part.2 {Stretch H.factor H.1}|L}
 		       [] drone(note:NoteOrchord amount:Natural) then {PartitionTimedListHelper Part.2 {Drone H.note H.amount}|L}
 		       [] transpose(semitones:Integer P) then {PartitionTimedListHelper Part.2 {Transpose H.semitones H.1}|L}
@@ -71,16 +71,16 @@ local
 	      end
 	   end
 	end	 
-     in
-	Total = {TotalDuration FlatPartition 0.0}
-	if Total == 0.0 then
+      in
+	 Total = {TotalDuration FlatPartition 0.0}
+	 if Total == 0.0 then
 	   FlatPartition
-	else
+	 else
 	   {Stretch (Duration/Total) FlatPartition}
-	end
-     end
-  end
-  
+	 end
+      end
+   end
+   
   fun {Stretch Factor Partition}
      local
 	FlatPartition = {PartitionToTimedList Partition}
@@ -179,7 +179,7 @@ local
 	   end
 	end
      in
-      {TransposeBis Semitones FlatPartition nil}
+	{TransposeBis Semitones FlatPartition nil}
      end
   end
   

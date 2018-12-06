@@ -210,10 +210,12 @@ fun {Mix P2T Music}
 	    else
 	       skip
 	    end
+
 	    if Index > Length then L
 	    else
 	       {MixHelper Note Index+1 (1.0/2.0)*{Float.sin (2.0*3.14159265359*{Number.pow 2.0 {Int.toFloat (Numvalue - 10) + (( Note.octave - 4)*12)}/12.0}*440.0*Index/44100.0)}|L}
 	    end
+
 	 end
       end
       
@@ -258,28 +260,58 @@ fun{Repeat Amount Music}
 end
 
 declare
-fun {Merge L}
+fun {Merge MusicList}
    local
-      fun {Sum L1 L2 Ans}
+      fun {MusicTimesFactor Music Factor A}
+	 if Music == nil then {Reverse A}
+	 else
+	    {MusicTimesFactor Music.2 Factor {Map Music.1 fun {$ X} X*Factor end}|A}
+	 end
+      end
+  
+      fun {MergeBis Music Ans}
+	 if Music == nil then Ans
+	 else
+	    {MergeBis Music.2 {MergeTwoMusic Ans {MusicTimesFactor Music.1.2 Music.1.1 nil} nil}}
+	 end   	 
+      end
+      
+      fun {MergeTwoMusic L1 L2 Ans}
 	 if {And L1 == nil L2 == nil} then {Reverse Ans}
+	 elseif {And L1 \= nil L2 == nil} then {MergeTwoMusic L1.2 nil {MergeHelper [L1.1] nil}|Ans}
+	 elseif {And L1 == nil L2 \= nil} then {MergeTwoMusic nil L2.2 {MergeHelper [L2.1] nil}|Ans}
+	 else
+	    {MergeTwoMusic L1.2 L2.2 {MergeHelper [L1.1 L2.1] nil}|Ans}
+	 end
+      end
+      								     
+      fun {Sum L1 L2 Ans}
+	 if {And L1 == nil L2 == nil} then {Reverse  Ans}
 	 elseif {And L1 \= nil L2 == nil} then {Sum L1.2 nil (L1.1|Ans)}
 	 elseif {And L1 == nil L2 \= nil} then {Sum nil L2.2 (L2.1|Ans)}	   
 	 else
 	    {Sum L1.2 L2.2 (L1.1 + L2.1)|Ans}
 	 end
       end
-      
       fun {MergeHelper L Acc}
 	 if L == nil then Acc
 	 else
-	    {MergeHelper L.2 {Sum Acc {Map L.1.2 fun {$ X} X*L.1.1 end} nil}}
+	    {MergeHelper L.2 {Sum L.1 Acc nil}}
 	 end
       end
    in
-      {MergeHelper L nil}
+      {MergeBis MusicList nil}
    end
 end
 
+local
+   X = [3.0#[[1.0 2.0 3.0] [0.5 0.2] [5.0 6.0 8.0]] 2.0#[[1.0 2.0 3.0] [4.0 5.0 6.0 ] nil]]
+   Factor = 2.0
+in
+     {Browse {Merge [3.0#[[1.0 2.0 3.0] [0.5 0.2] [1.0 1.0 1.0]] 2.0#[[0.1 0.2 0.3] [0.5 1.5 2.0]] 1.0#[[10.0 20.0 30.0]] 5.0#[[1.0]]]}}    
+	 
+end
+      
 declare
 fun{Loop Duration Music}
    local
@@ -306,7 +338,7 @@ local
    Music
    [Project] = {Link ['D:/unif/2018-2019/info2/ProjetOz/Info2Oz/Project2018.ozf']}
    fun{PartitionToTimedList}
-   0
+      0
    end
    fun {NoteToExtended Note}
       case Note
@@ -326,15 +358,16 @@ local
 	 end
       end
    end
-   fun{Loop Duration Music}
+   
+   fun {Loop Duration Music}
       local
 	 fun {LoopHelper Duration Music Acc}
 	    local
 	       Samples = Music
 	    in 
-	       if {And Music == nil Duration < 0.0} then {Reverse Acc.2}
-	       elseif {And Music == nil Duration \= 0.0} then {LoopHelper Duration-{Int.toFloat {Length Samples.1}}/44100.0 Samples.2 Samples.1|Acc}
-	       else {LoopHelper Duration-{Int.toFloat {Length Music.1}}/44100.0 Music.2 Music.1|Acc}
+	       if Duration < 0.0 then {Reverse Acc.2}
+	       elseif Music == nil then {LoopHelper Duration-{Int.toFloat {Length Samples.1}} Samples.2 Samples.1|Acc}
+	       else {LoopHelper Duration-{Int.toFloat {Length Music.1}} Music.2 Music.1|Acc}
 	       end
 	    end
 	 end
@@ -344,18 +377,14 @@ local
    end
    
    fun {Mix P2T Music}
-      {Loop 10.0 {Project.readFile 'D:/unif/2018-2019/info2/ProjetOz/Info2Oz/wave/animals/cow.wav'}}
+     0 %{Repeat 10 {Project.readFile 'D:/unif/2018-2019/info2/ProjetOz/Info2Oz/wave/animals/owl.wav'}}
    end
    
 in
-   Music = {Project.load 'D:/unif/2018-2019/info2/ProjetOz/Info2Oz/joy.dj.oz'}
-   {ForAll [NoteToExtended Music] Wait}
-   {Browse {Project.run Mix PartitionToTimedList Music 'D:/unif/2018-2019/info2/ProjetOz/Info2Oz/test/out.wav'}}	 
+   
+   {Browse {Project.readFile 'D:/unif/2018-2019/info2/ProjetOz/Info2Oz/wave/animals/owl.wav'}}
+  % Music = {Project.load 'D:/unif/2018-2019/info2/ProjetOz/Info2Oz/joy.dj.oz'}
+   %{ForAll [NoteToExtended Music] Wait}
+  % {Browse {Project.run Mix PartitionToTimedList Music 'D:/unif/2018-2019/info2/ProjetOz/Info2Oz/test/out.wav'}}	 
 end
 
-
-      
-      
-   
-   
-      
