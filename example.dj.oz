@@ -1,6 +1,6 @@
 local
    % See project statement for API details.
-   Project = [3]%{Link ['Project2018.ozf']}
+   Projet = [3]%{Link ['Project2018.ozf']}
    %Time = {Link ['x-oz://boot/Time']}.1.getReferenceTime
 
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -395,30 +395,15 @@ end
 	 {MixHelper P2T Music nil}
       end
    end
-   	 
-	 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+      Tune = [b b c5 d5 d5 c5 b a g g a b]
+   End1 = [stretch(factor:1.5 [b]) stretch(factor:0.5 [a]) stretch(factor:2.0 [a])]
+   End2 = [stretch(factor:1.5 [a]) stretch(factor:0.5 [g]) stretch(factor:2.0 [g])]
+   Interlude = [a a b g a stretch(factor:0.5 [b c5])
+                    b g a stretch(factor:0.5 [b c5])
+                b a g a stretch(factor:2.0 [d]) ]
 
-   Music = {Project.load 'joy.dj.oz'}
-   Start
-
-   % Uncomment next line to insert your tests.
-   % \insert 'tests.oz'
-   % !!! Remove this before submitting.
+  
+   Partition = {Flatten [Tune End1 Tune End2 Interlude Tune End2]}
 in
-   Start = {Time}
-
-   % Uncomment next line to run your tests.
-   % {Test Mix PartitionToTimedList}
-
-   % Add variables to this list to avoid "local variable used only once"
-   % warnings.
-   {ForAll [NoteToExtended Music] Wait}
-   
-   % Calls your code, prints the result and outputs the result to `out.wav`.
-   % You don't need to modify this.
-   {Browse {Project.run Mix PartitionToTimedList Music 'out.wav'}}
-   
-   % Shows the total time to run your code.
-   {Browse {IntToFloat {Time}-Start} / 1000.0}
+   {Browse {Mix PartitionTimedList Partition}}
 end
