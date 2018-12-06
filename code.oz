@@ -6,7 +6,6 @@ local
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
    % Translate a note to the extended notation.
-  declare
   fun {NoteToExtended Note}
      case Note
      of note(name : Name octave : Octave sharp : Sharp duration:Duration instrument:Instrument) then
@@ -47,7 +46,7 @@ local
 		       of duration(seconds:Dur P) then {PartitionTimedListHelper Part.2 {Duration H.seconds H.1}|L}
 		       [] stretch(factor:Factor P) then {PartitionTimedListHelper Part.2 {Stretch H.factor H.1}|L}
 		       [] drone(note:NoteOrchord amount:Natural) then {PartitionTimedListHelper Part.2 {Drone H.note H.amount}|L}
-		       []	transpose(semitones:Integer P) then {PartitionTimedListHelper Part.2 {Transpose H.semitones H.1}|L}
+		       [] transpose(semitones:Integer P) then {PartitionTimedListHelper Part.2 {Transpose H.semitones H.1}|L}
 		       else {PartitionTimedListHelper Part.2 {ChordOrNoteToExtended Part.1}|L}
 		       end
 	   else 'You re not supposed to be here'   
@@ -55,7 +54,7 @@ local
 	end
      in
 	{PartitionTimedListHelper Partition nil}
-     end
+      end
   end
   
   fun {Duration Duration Partition}
@@ -188,23 +187,23 @@ local
   
   fun {Mix P2T Music}
      local
-	fun{MixHelper2 P2T music Acc}
+	fun{MixHelper2 P2T Music Acc}
 	   case Music
 	   of nil
 	   then Acc
 	   [] H|T
 	      case H
-	      of sample(Samples) then {Cut ~1 1 Sample}|Acc
+	      of sample(Samples) then {Clip ~1 1 Samples}|Acc
 	      [] partition(Partition) then {MixBis {P2T Partition} 1.0 nil}|Acc
 	      [] wave(Filename) then {Wave Filename}|Acc
-	      [] merge(Musics) then {Merge musics}
+	      [] merge(Musics) then {Merge Musics}
 	      [] reverse(Music) then {Reverse Music}
 	      [] repeat(amount:Integer Music) then {Repeat Integer Music}
-	      [] loop(seconds:Duration Music) then {Loop Duration music}
+	      [] loop(seconds:Duration Music) then {Loop Duration Music}
 	      [] clip(low:Low high:High Music) then {Clip Low High Music}
 	      [] echo(delay:Duration decay:Factor Music) then {Echo Duration Factor Music]
 	      [] fade(start:Dur1 out:Dur2 Music) then {Fade Dur1 Dur2 Music}
-	      [] cut(Start:Dur1 finish:Dur2 Music) then {Cut Dur1 Dur2 Music)
+	      [] cut(start:D1 finish:D2 Music) then {Cut D1 D2 Music)
 	      end
 	   end
 	end	 
@@ -259,7 +258,7 @@ local
 	   end
 	end
      in
-	{MixHelper2 P2T music Acc}
+	{MixHelper2 P2T Music nil}
      end
   end
   
@@ -268,7 +267,8 @@ local
   end
   
   fun{Repeat Amount Music}
-     local Samples = {Mix P2T Music}
+     local
+	Samples = {Mix P2T Music}
 	fun {RepeatHelper X N L}
 	   case N
 	   of 0 then L
@@ -329,21 +329,16 @@ local
 	   end
 	end
      in
-	{ClipHelper Low High Sample nil}
+	{ClipHelper Low High Samples nil}
      end
   end
   
   fun{Echo Duration Factor Music}
      local
+	Samples = {Mix P2T Music}
 	TrueDuration = Duration*44100.0
-	fun{Silence Duration Acc}
-	   if Duration =< 0.0 then Acc
-	   else {Silence Duration-1.0 0.0|Acc}
-	   end
-	end
-	
      in
-	{Merge [Factor#Music 1.0#{Append {Silence TrueDuration nil} Music}]}
+	{Merge [Factor#Samples 1.0#{Append {Silence TrueDuration nil} Samples}]}
      end
   end
   
