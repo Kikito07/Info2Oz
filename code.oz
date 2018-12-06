@@ -1,7 +1,7 @@
 local
    % See project statement for API details.
-   Project = [3]%{Link ['Project2018.ozf']}
-   %Time = {Link ['x-oz://boot/Time']}.1.getReferenceTime
+   [Project] = {Link ['Project2018.ozf']}
+   Time = {Link ['x-oz://boot/Time']}.1.getReferenceTime
 
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
